@@ -1,58 +1,65 @@
 import './App.css'
 import {extend} from '@react-three/fiber'
 import {Stats, OrbitControls} from '@react-three/drei'
-
-
 import {Canvas, useFrame} from '@react-three/fiber'
-import {useRef} from "react";
+import {useEffect, useRef, useState} from "react";
+
+
+const bigSphereSize = 1.5
+const secondBigSphereSize = 1.3
+const mediumSphereSize = 0.4
+const littleSphereSize = 0.2
+const littleStarDispersion = 100
+const littleStarProximite = 0
 
 function App() {
-    const bigSphereSize = 1.5
-    const secondBigSphereSize = 1.3
-    const mediumSphereSize = 0.4
-    const littleSphereSize = 0.2
+
     return (
         <>
             <Canvas
+
             >
                 {/*<gridHelper/>*/}
                 <OrbitControls enableDamping={true} damping={0.5}/>
                 <ambientLight intensity={2} color="white"/>
+                <Background quantity={2000}></Background>
                 <BigSphere size={bigSphereSize}></BigSphere>
+
+
                 <MovingSphere size={mediumSphereSize} position={[1, 1, 1]} color="white"/>
 
-                <MovingSphere size={littleSphereSize} position={[-1.5, -1, -1]}  color="white"/>
-                <MovingSphere size={secondBigSphereSize}  position={[-0.2, -0.2, -0.2]}
+                <MovingSphere size={littleSphereSize} position={[-1.5, -1, -1]} color="white"/>
+                <MovingSphere size={secondBigSphereSize} position={[-0.2, -0.2, -0.2]}
                               color="white"/>
 
 
-                <MovingSphere size={littleSphereSize} position={[-1.2, -2, -1.4]}  decalage={2} color="white"/>
-                <MovingSphere size={secondBigSphereSize}  decalage={0.2}
+                <MovingSphere size={littleSphereSize} position={[-1.2, -2, -1.4]} decalage={2} color="white"/>
+                <MovingSphere size={secondBigSphereSize} decalage={0.2}
                               position={[-0.2, -0.2, -0.2]} color="white"/>
 
                 <MovingSphere size={littleSphereSize} position={[-0.6, 0.8, 3]} color="white"/>
-                <MovingSphere size={secondBigSphereSize}  decalage={0.2}
+                <MovingSphere size={secondBigSphereSize} decalage={0.2}
                               position={[-0.3, 0.2, 0.3]} color="white"/>
 
 
-                <MovingSphere size={mediumSphereSize} position={[-0.6, -6, 2]}  decalage={2} color="white"/>
-                <MovingSphere size={secondBigSphereSize}  position={[-0.3, -0.2, 0.2]}
+                <MovingSphere size={mediumSphereSize} position={[-0.6, -6, 2]} decalage={2} color="white"/>
+                <MovingSphere size={secondBigSphereSize} position={[-0.3, -0.2, 0.2]}
                               color="white"/>
 
                 <MovingSphere size={littleSphereSize} position={[-5, -2, -1.4]} decalage={2} color="white"/>
-                <MovingSphere size={secondBigSphereSize}  decalage={0.2}
+                <MovingSphere size={secondBigSphereSize} decalage={0.2}
                               position={[0.3, -0.2, 0.2]} color="white"/>
 
 
-                <MovingSphere size={littleSphereSize} position={[2, -1, 3]} decalage={1.5} color="white" />
+                <MovingSphere size={littleSphereSize} position={[2, -1, 3]} decalage={2} color="white"/>
 
-                <MovingSphere size={mediumSphereSize} position={[4, -4, -1]} decalage={2.3} color="white" />
-                <MovingSphere size={littleSphereSize} position={[-2, 3, 1]} decalage={1} color="white" />
+                <MovingSphere size={mediumSphereSize} position={[4, -4, -1]} decalage={5} color="white"/>
+                <MovingSphere size={littleSphereSize} position={[-2, 3, 1]} decalage={15} color="white"/>
 
-                 <MovingSphere size={littleSphereSize} position={[-4, 1, 2]} decalage={1.8} color="white" />
+                <MovingSphere size={littleSphereSize} position={[-4, 1, 2]} color="white"/>
 
-                <MovingSphere size={mediumSphereSize} position={[1.2, -3.2, 0.8]} decalage={2.5} color="white" />
-                </Canvas>
+                <MovingSphere size={mediumSphereSize} position={[1.2, -3.2, 0.8]} decalage={2.5} color="white"/>
+            </Canvas>
         </>
     )
 }
@@ -94,11 +101,62 @@ function MovingSphere({size, position, color, decalage = 0}) {
 
     })
     return (
-        <mesh position={[0,0,0]} ref={sphere}>
+        <mesh position={[0, 0, 0]} ref={sphere}>
             <icosahedronGeometry args={[size, 10]}/>
-            <meshStandardMaterial color={color} flatShading={true}/>
+            <meshStandardMaterial color={color}/>
         </mesh>
     )
+}
+
+function getRandom(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min
+}
+
+function getRandomTint() {
+
+    const arrayOfColorFunctions = "0123456789abcdef";
+    let index = Math.floor(Math.random() * 16);
+    let value = arrayOfColorFunctions[index];
+    let index2 = Math.floor(Math.random() * 16);
+    let value2 = arrayOfColorFunctions[index2];
+    return "#" + (value + value2).repeat(3)
+}
+
+function Background({quantity}) {
+    let refs = useRef([])
+    const [spheres, setSpheres] = useState([])
+    useEffect(() => {
+        let spheresData = []
+        for (let i = 0; i < quantity; i++) {
+            spheresData.push({
+                position: [getRandom(-littleStarDispersion, littleStarDispersion), getRandom(-littleStarDispersion, littleStarDispersion), getRandom(-littleStarDispersion, littleStarDispersion)],
+                size: getRandom(0.1, 1),
+                color: getRandomTint()
+            })
+        }
+
+        setSpheres(spheresData)
+    }, []);
+
+    console.log(spheres)
+
+
+
+
+    return (
+        spheres.map((sphere, index) => {
+                return (
+                    <mesh key={index} position={sphere.position} ref={refs.current[index]}>
+                        <icosahedronGeometry args={[sphere.size, 10]}/>
+                        <meshStandardMaterial color={sphere.color}/>
+                    </mesh>
+                )
+            }
+        )
+
+    )
+
+
 }
 
 export default App
