@@ -1,5 +1,5 @@
 import './App.css'
-import {extend} from '@react-three/fiber'
+import {extend, useThree} from '@react-three/fiber'
 import {Stats, OrbitControls} from '@react-three/drei'
 import {Canvas, useFrame} from '@react-three/fiber'
 import {useEffect, useRef, useState} from "react";
@@ -17,11 +17,13 @@ function App() {
     return (
         <>
             <Canvas
-
+                camera={{fov: 75, near: 0.1, far: 1000, position: [5, 0, 10]}}
             >
+                <CameraController position={[20, 0, 20]}></CameraController>
                 {/*<gridHelper/>*/}
                 <OrbitControls enableDamping={true} damping={0.5}/>
                 <ambientLight intensity={2} color="white"/>
+                <camera position={[0, 0, 75]}/>
                 <Background quantity={2000}></Background>
                 <BigSphere size={bigSphereSize}></BigSphere>
 
@@ -34,7 +36,7 @@ function App() {
 
 
                 <MovingSphere size={littleSphereSize} position={[-1.2, -2, -1.4]} decalage={2} color="white"/>
-                <MovingSphere size={secondBigSphereSize} decalage={0.2}
+                <MovingSphere size={secondBigSphereSize} decalage={2}
                               position={[-0.2, -0.2, -0.2]} color="white"/>
 
                 <MovingSphere size={littleSphereSize} position={[-0.6, 0.8, 3]} color="white"/>
@@ -47,7 +49,7 @@ function App() {
                               color="white"/>
 
                 <MovingSphere size={littleSphereSize} position={[-5, -2, -1.4]} decalage={2} color="white"/>
-                <MovingSphere size={secondBigSphereSize} decalage={0.2}
+                <MovingSphere size={secondBigSphereSize} decalage={2}
                               position={[0.3, -0.2, 0.2]} color="white"/>
 
 
@@ -62,6 +64,17 @@ function App() {
             </Canvas>
         </>
     )
+}
+
+function CameraController({position}) {
+    const {camera} = useThree()
+    useFrame(({clock}) => {
+        let time = clock.elapsedTime / 5
+        camera.position.x = Math.sin(time) * position[0]
+        camera.position.z = Math.cos(time) * position[2]
+        camera.lookAt(0, 0, 0)
+    })
+    return null
 }
 
 function BigSphere({size}) {
@@ -108,8 +121,17 @@ function MovingSphere({size, position, color, decalage = 0}) {
     )
 }
 
-function getRandom(min, max) {
-    return Math.floor(Math.random() * (max - min)) + min
+function getRandom(min,max) {
+    let positif = Math.random() < 0.5
+
+    // get number between ex 2 and 100
+    let nb = Math.floor(Math.random() * (max - min)) + min
+
+    // we can get between -2 and 100
+    if (!positif) {
+        nb = -nb
+    }
+    return nb
 }
 
 function getRandomTint() {
@@ -129,8 +151,8 @@ function Background({quantity}) {
         let spheresData = []
         for (let i = 0; i < quantity; i++) {
             spheresData.push({
-                position: [getRandom(-littleStarDispersion, littleStarDispersion), getRandom(-littleStarDispersion, littleStarDispersion), getRandom(-littleStarDispersion, littleStarDispersion)],
-                size: getRandom(0.1, 1),
+                position: [getRandom(littleStarProximite,littleStarDispersion), getRandom(littleStarProximite,littleStarDispersion), getRandom(littleStarProximite,littleStarDispersion)],
+                size: Math.abs( getRandom(0.1,0.5)),
                 color: getRandomTint()
             })
         }
@@ -139,8 +161,6 @@ function Background({quantity}) {
     }, []);
 
     console.log(spheres)
-
-
 
 
     return (
